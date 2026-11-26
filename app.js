@@ -20,7 +20,7 @@
 
   /* ---------- state ---------- */
   const KEY = 'fys.v1';
-  const DEFAULTS = { size: 9, form: '3-2-3', slot: 4, kit: 'red', num: 10, name: '', sit: 'open', side: 'L', phase: 'att', showOpp: true, best: 0, onboarded: false };
+  const DEFAULTS = { size: 9, form: '3-2-3', slot: 4, kit: 'red', num: 10, name: '', sit: 'open', side: 'L', phase: 'att', showOpp: true, skipCorner: false, best: 0, onboarded: false };
   let S = Object.assign({}, DEFAULTS);
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* storage blocked */ }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } };
@@ -158,12 +158,15 @@
   const place = (g, p) => { g.style.transform = `translate(${p.x}px, ${size().L - p.y}px)`; };
 
   /* ---------- render ---------- */
-  let ownPos = [];
+  let ownPos = [], canSkip = false;
   function render() {
     const sz = size(), c = cur();
     if (!ball) ball = E.defaultBall(c.sit, sz, c.side);
     const b = quiz ? quiz.ball : ball;
-    ownPos = E.positions(c.sit, slots(), sz, b, c.phase);
+    const skip = !quiz && c.sit === 'cornerFor' && S.skipCorner;
+    ownPos = E.positions(c.sit, slots(), sz, b, c.phase, skip ? { notTaker: S.slot } : null);
+    // Only offer the choice when you would be the one taking it.
+    canSkip = !quiz && c.sit === 'cornerFor' && (skip || ownPos[S.slot].job === 'cornerTaker');
     ownPos.forEach((p, i) => place(ownToks[i], p));
     const hideYou = quiz && !quiz.guess;
     ownToks[S.slot].style.opacity = hideYou ? 0 : 1;
@@ -185,6 +188,8 @@
     $('sitChips').style.pointerEvents = quiz ? 'none' : '';
     $('sitChips').style.opacity = quiz ? .5 : 1;
     $('oppToggle').checked = S.showOpp;
+    $('takeToggleWrap').classList.toggle('hide', !canSkip);
+    $('takeToggle').checked = !!S.skipCorner;
     const k = kitOf(S.kit), s = slots()[S.slot];
     $('meChip').innerHTML = `<i style="background:${s.role === 'GK' ? GK_KIT.c : k.c}"></i>${esc(s.abbr)} #${esc(S.num)}`;
   }
@@ -217,6 +222,7 @@
       });
     } else {
       html += `<div class="coach-where">${esc(sitDef(c.sit).label)}</div>`;
+      if (canSkip && S.skipCorner) html += '<p class="muted small">A teammate takes this corner, so get to your spot in the box.</p>';
       if (job && job.tips) html += `<div class="job"><h3>Your job: ${esc(job.title)}</h3>${list(job.tips)}</div>`;
       else {
         const ph = /For$/.test(c.sit) ? 'att' : 'def';
@@ -266,6 +272,7 @@
   });
   $('phaseSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b || quiz) return; S.phase = b.dataset.phase; save(); render(); });
   $('sideSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b || quiz) return; S.side = b.dataset.side; ball = E.defaultBall(S.sit, size(), S.side); save(); render(); });
+  $('takeToggle').addEventListener('change', (e) => { S.skipCorner = e.target.checked; save(); render(); });
   $('oppToggle').addEventListener('change', (e) => { S.showOpp = e.target.checked; save(); render(); });
 
   const panel = $('panel'), scrim = $('scrim');

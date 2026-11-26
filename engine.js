@@ -179,15 +179,15 @@
   function basePt(s, size) { return { x: s.x * size.W, y: s.y * size.L }; }
 
   /* ---------- corners ---------- */
-  function cornerFor(slots, size, ball) {
+  function cornerFor(slots, size, ball, opts) {
     const { W, L, ga, pa, goal, spot, n } = size, gx = W / 2, sc = W / 68;
     const sgn = ball.x < gx ? -1 : 1;
     const out = [];
     const pool = fieldIdx(slots);
     out[0] = { i: 0, x: gx, y: L * 0.3, job: 'gkUp' };
-    const [taker] = take(pool, 1, (a, b) =>
-      (dist(basePt(slots[a], size), ball) + (/CB|FB/.test(slots[a].role) ? 999 : 0)) -
-      (dist(basePt(slots[b], size), ball) + (/CB|FB/.test(slots[b].role) ? 999 : 0)));
+    const skip = opts && opts.notTaker;  // slot index that chose not to take it
+    const cost = (i) => dist(basePt(slots[i], size), ball) + (/CB|FB/.test(slots[i].role) ? 999 : 0) + (i === skip ? 9999 : 0);
+    const [taker] = take(pool, 1, (a, b) => cost(a) - cost(b));
     out[taker] = { i: taker, x: ball.x - sgn * 0.8 * sc, y: ball.y - 0.8 * sc, job: 'cornerTaker' };
     const restN = { 5: 1, 7: 1, 9: 2, 11: 3 }[n];
     const rest = take(pool, restN, (a, b) => slots[a].y - slots[b].y);
@@ -401,8 +401,9 @@
     return out;
   }
 
-  function positions(sitId, slots, size, ball, phase) {
-    const out = sitId === 'open' ? openPlay(slots, size, ball, phase || 'att') : SIT_FN[sitId](slots, size, ball);
+  // opts.notTaker: slot index that will not take the corner (someone else takes it)
+  function positions(sitId, slots, size, ball, phase, opts) {
+    const out = sitId === 'open' ? openPlay(slots, size, ball, phase || 'att') : SIT_FN[sitId](slots, size, ball, opts);
     relax(out, size);
     if (sitId === 'koFor' || sitId === 'koAgainst') keepOwnHalf(out, size, sitId === 'koAgainst');
     return out;
