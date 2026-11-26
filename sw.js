@@ -1,7 +1,9 @@
 // Offline support: cache the app shell, serve cache first, refresh in the background.
-const CACHE = 'fys-v9';
+const CACHE = 'fys-v10';
 const FILES = ['./', 'index.html', 'styles.css', 'engine.js', 'tips.js', 'app.js', 'icon.svg', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest'];
-self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
+self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); });
+// A new version waits until the user taps Update (or all tabs close).
+self.addEventListener('message', (e) => { if (e.data === 'skipWaiting') self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });

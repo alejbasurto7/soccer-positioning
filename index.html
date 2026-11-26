@@ -98,12 +98,38 @@
 
 <div class="toast hide" id="toast" role="status"></div>
 
+<div class="update hide" id="updateCard" role="alertdialog" aria-labelledby="updateTitle" aria-describedby="updateMsg">
+  <div>
+    <strong id="updateTitle">New version available</strong>
+    <p class="muted small" id="updateMsg">Update now to get the latest changes.</p>
+  </div>
+  <div class="update-actions">
+    <button type="button" class="btn small ghost" id="updateSkip">Skip</button>
+    <button type="button" class="btn small" id="updateNow">Update</button>
+  </div>
+</div>
+
 <script src="engine.js"></script>
 <script src="tips.js"></script>
 <script src="app.js"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  window.addEventListener('load', () => {
+    const card = document.getElementById('updateCard');
+    let waiting = null, reloading = false;
+    const show = () => { const open = document.querySelector('dialog[open]'); if (open) open.addEventListener('close', show, { once: true }); else card.classList.remove('hide'); };
+    const offer = (sw) => { if (!navigator.serviceWorker.controller) return; waiting = sw; show(); };
+    const watch = (sw) => sw.addEventListener('statechange', () => { if (sw.state === 'installed') offer(sw); });
+    document.getElementById('updateNow').onclick = () => { card.classList.add('hide'); if (waiting) waiting.postMessage('skipWaiting'); };
+    document.getElementById('updateSkip').onclick = () => card.classList.add('hide');
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloading) { reloading = true; location.reload(); } });
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      if (reg.waiting) offer(reg.waiting);
+      if (reg.installing) watch(reg.installing);
+      reg.addEventListener('updatefound', () => watch(reg.installing));
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+    }).catch(() => {});
+  });
 }
 </script>
 </body>
