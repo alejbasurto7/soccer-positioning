@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Find Your Spot</title>
+<meta name="description" content="A free app that teaches young soccer players where to stand. Pick your position, move the ball, and watch every player move to the right spot.">
+<meta name="theme-color" content="#0E5A3A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img src="icon.svg" alt="" width="30" height="30"><span>Find Your Spot</span></div>
+  <div class="top-actions">
+    <button id="quizBtn" class="btn ghost" type="button">Quiz me</button>
+    <button id="setupBtn" class="btn ghost" type="button" aria-label="My team and position">
+      <span id="meChip" class="me-chip"></span>
+    </button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="board">
+    <div class="chips" id="sitChips" role="tablist" aria-label="Situation"></div>
+    <div class="controls">
+      <div class="seg" id="phaseSeg" role="radiogroup" aria-label="Who has the ball">
+        <button type="button" data-phase="att">We have it</button>
+        <button type="button" data-phase="def">They have it</button>
+        <button type="button" data-phase="loose">Loose ball</button>
+      </div>
+      <div class="seg" id="sideSeg" role="radiogroup" aria-label="Which corner">
+        <button type="button" data-side="L">Left corner</button>
+        <button type="button" data-side="R">Right corner</button>
+      </div>
+      <label class="toggle"><input type="checkbox" id="oppToggle" checked> Other team</label>
+    </div>
+
+    <div class="quizbar hide" id="quizBar">
+      <div><strong id="quizQ">Where should you be?</strong> <span class="muted" id="quizHint">Tap the field.</span></div>
+      <div class="quiz-actions">
+        <span class="streak" id="streak"></span>
+        <button type="button" class="btn small" id="quizNext">Next</button>
+        <button type="button" class="btn small ghost" id="quizExit">Done</button>
+      </div>
+    </div>
+
+    <div class="field-wrap">
+      <svg id="field" tabindex="0" aria-label="Soccer field. Drag the ball, or use arrow keys to move it." role="application"></svg>
+    </div>
+    <p class="status" id="status" aria-live="polite"></p>
+    <button id="coachBtn" class="btn coach" type="button">Coach tips</button>
+  </section>
+
+  <aside class="panel" id="panel" aria-label="Coach tips">
+    <div class="panel-head">
+      <h2>Coach</h2>
+      <button type="button" class="icon-btn" id="panelClose" aria-label="Close">&times;</button>
+    </div>
+    <div id="coach"></div>
+  </aside>
+  <div class="scrim hide" id="scrim"></div>
+</main>
+
+<dialog id="setup">
+  <form method="dialog" class="setup">
+    <h2>My team</h2>
+    <label class="field">Your name (optional)
+      <input id="nameIn" maxlength="20" autocomplete="off">
+    </label>
+    <div class="field">Team size
+      <div class="seg" id="sizeSeg"></div>
+    </div>
+    <div class="field">Formation
+      <div class="seg wrap" id="formSeg"></div>
+    </div>
+    <div class="field">Your position <span class="muted small">Tap your spot</span>
+      <svg id="miniField" class="mini"></svg>
+      <div id="posName" class="pos-name"></div>
+    </div>
+    <div class="field">Your kit
+      <div class="kits" id="kitRow"></div>
+    </div>
+    <label class="field">Shirt number
+      <input id="numIn" type="number" min="0" max="99" inputmode="numeric">
+    </label>
+    <div class="setup-actions">
+      <button type="button" class="btn ghost" id="shareBtn">Copy team link</button>
+      <button class="btn" id="doneBtn" value="done">Done</button>
+    </div>
+    <p class="muted small">Coaches: set the team size and formation, then copy the team link and send it to your players. Everything stays on the device. No account needed.</p>
+  </form>
+</dialog>
+
+<div class="toast hide" id="toast" role="status"></div>
+
+<script src="engine.js"></script>
+<script src="tips.js"></script>
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
