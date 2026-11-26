@@ -165,6 +165,15 @@
     koReceiver:  { title: 'Receive the kickoff', tips: ['Stand a few steps away to get the first pass.', 'Have a plan: pass wide or switch it.', 'Keep it. Do not just kick it away.'] },
     koRun:       { title: 'Ready to run', tips: ['Stand on the halfway line in your own half.', 'Sprint forward as soon as the ball is kicked.', 'Stay onside.'] },
     koPress:     { title: 'Pressure their kickoff', tips: ['Stay out of the center circle until the ball is kicked.', 'Then pressure the ball fast.', 'Block the easy pass back.'] },
+    tiTaker:     { title: 'Take the throw-in', tips: ['Both feet on the ground, on or behind the line.', 'Ball goes behind your head with both hands.', 'Throw it to a teammate\'s feet, then step back onto the field.'] },
+    tiLine:      { title: 'Down the line', tips: ['Run down the sideline, away from the thrower.', 'Get it on your feet or chest and turn up the field.', 'If a defender is on you, check back short.'] },
+    tiShort:     { title: 'Check to the ball', tips: ['Start away from the thrower, then come back fast.', 'Ask for it at your feet: "Feet!"', 'Pass it right back to the thrower, they are now open.'] },
+    tiBack:      { title: 'Safe option behind', tips: ['Stand behind the thrower, a little inside.', 'If nothing is open forward, they throw it to you.', 'Switch the ball to the other side of the field.'] },
+    tiBox:       { title: 'Attack the long throw', tips: ['Go to the middle of the box near the penalty spot.', 'Flick it on or head it toward goal.', 'Follow it in for rebounds.'] },
+    tiShape:     { title: 'Throw-in spot', tips: ['Stay in your normal spot in the formation.', 'Keep your mark close in case the throw comes to you.', 'Be ready to move as soon as the ball does.'] },
+    tiMarkLine:  { title: 'Cover down the line', tips: ['Stand goal side of the player running down the sideline.', 'Do not let the ball go over your head.', 'Win it or kick it out again.'] },
+    tiMarkShort: { title: 'Mark the short throw', tips: ['Stay close to the player checking back for the ball.', 'Get in front if you can and steal it.', 'Stay at least 2 yards away from the thrower.'] },
+    tiMarkBack:  { title: 'Block the back pass', tips: ['Stand between the thrower and their safe option behind.', 'Keep them stuck near the sideline.', 'Press as soon as the ball is thrown.'] },
     koShape:     { title: 'Kickoff spot', tips: ['Stay in your own half until the ball is kicked.', 'Be in your normal spot in the formation.', 'Be ready to move as soon as the ball does.'] },
   };
 
