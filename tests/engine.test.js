@@ -2,7 +2,7 @@
 const E = require('../engine.js');
 let fails = 0;
 const ok = (c, m) => { if (!c) { fails++; console.log('FAIL', m); } };
-for (const n of [7, 9, 11]) {
+for (const n of [5, 7, 9, 11]) {
   const size = E.SIZES[n];
   for (const form of size.forms) {
     const slots = E.slotsFor(n, form);

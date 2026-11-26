@@ -10,7 +10,7 @@ It is an original app. It has its own positioning engine and its own coaching ti
 - **Interactive field**: drag the ball anywhere (or use arrow keys). Both teams move to their spots.
 - **Who has the ball**: "We have it", "They have it", "Loose ball". Each changes the team shape.
 - **Situations**: open play, corners for and against (left and right), free kicks for and against (with a wall), goal kicks for and against, kickoffs for and against.
-- **Team sizes**: 7v7 (2-3-1, 3-2-1, 2-1-2-1), 9v9 (3-2-3, 3-3-2, 2-4-2), 11v11 (4-3-3, 4-4-2, 4-2-3-1, 3-5-2, 3-4-3).
+- **Team sizes**: 5v5 (1-2-1, 2-2, 2-1-1), 7v7 (2-3-1, 3-2-1, 2-1-2-1), 9v9 (3-2-3, 3-3-2, 2-4-2), 11v11 (4-3-3, 4-4-2, 4-2-3-1, 3-5-2, 3-4-3).
 - **Build-out lines** drawn for 7v7 and 9v9.
 - **Coach tips**: for each position, three tips for each phase (we have it, they have it, loose ball) in each third of the field. Set pieces show the player's job (for example "Be in the wall", "Near post run").
 - **Quiz mode**: the app hides your player. You tap where you think you should be and get scored in yards. It keeps a streak.

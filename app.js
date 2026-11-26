@@ -320,7 +320,7 @@
   function renderSetup() {
     $('nameIn').value = S.name;
     $('numIn').value = S.num;
-    $('sizeSeg').innerHTML = [7, 9, 11].map(n => `<button type="button" role="radio" data-size="${n}" aria-checked="${n === S.size}">${E.SIZES[n].label}</button>`).join('');
+    $('sizeSeg').innerHTML = [5, 7, 9, 11].map(n => `<button type="button" role="radio" data-size="${n}" aria-checked="${n === S.size}">${E.SIZES[n].label}</button>`).join('');
     $('formSeg').innerHTML = E.SIZES[S.size].forms.map(f => `<button type="button" role="radio" data-form="${f}" aria-checked="${f === S.form}">${f}</button>`).join('');
     $('kitRow').innerHTML = KITS.map(k => `<button type="button" role="radio" aria-label="${k.name}" data-kit="${k.id}" aria-checked="${k.id === S.kit}" style="background:${k.c}"></button>`).join('');
     const mini = $('miniField'), sz = size();

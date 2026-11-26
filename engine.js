@@ -6,6 +6,8 @@
   'use strict';
 
   const SIZES = {
+    5:  { n: 5,  label: '5v5',   L: 40,  W: 27, pa: [8, 16],      ga: [3, 8],     goal: 5.5,  circle: 5.5,  spot: 6,   fk: 5.5,  buildOut: false,
+          forms: ['1-2-1', '2-2', '2-1-1'] },
     7:  { n: 7,  label: '7v7',   L: 55,  W: 36, pa: [11, 22],     ga: [3.7, 11],  goal: 5.5,  circle: 7.3,  spot: 7.3, fk: 7.3,  buildOut: true,
           forms: ['2-3-1', '3-2-1', '2-1-2-1'] },
     9:  { n: 9,  label: '9v9',   L: 73,  W: 46, pa: [12.8, 32.9], ga: [4.6, 15.5], goal: 5.5,  circle: 7.3,  spot: 9.1, fk: 9.15, buildOut: true,
@@ -25,6 +27,14 @@
     ['RCB', 'Right center back', 'CB', .72, .18],
   ];
   const FORMATIONS = {
+    5: {
+      '1-2-1': [['D', 'Defender', 'CB', .50, .18], ['LM', 'Left midfielder', 'WM', .18, .40],
+                ['RM', 'Right midfielder', 'WM', .82, .40], ['F', 'Forward', 'FW', .50, .60]],
+      '2-2':   [['LD', 'Left defender', 'CB', .30, .19], ['RD', 'Right defender', 'CB', .70, .19],
+                ['LF', 'Left forward', 'FW', .30, .58], ['RF', 'Right forward', 'FW', .70, .58]],
+      '2-1-1': [['LD', 'Left defender', 'CB', .30, .18], ['RD', 'Right defender', 'CB', .70, .18],
+                ['CM', 'Center midfielder', 'CM', .50, .38], ['F', 'Forward', 'FW', .50, .60]],
+    },
     7: {
       '2-3-1': [['LCB', 'Left center back', 'CB', .30, .18], ['RCB', 'Right center back', 'CB', .70, .18],
                 ['LM', 'Left midfielder', 'WM', .12, .40], ['CM', 'Center midfielder', 'CM', .50, .36],
@@ -67,7 +77,7 @@
     },
   };
 
-  const OPP_FORM = { 7: '2-3-1', 9: '3-3-2', 11: '4-4-2' };
+  const OPP_FORM = { 5: '1-2-1', 7: '2-3-1', 9: '3-3-2', 11: '4-4-2' };
 
   const SITUATIONS = [
     { id: 'open',          label: 'Open play',         drag: true },
@@ -179,7 +189,7 @@
       (dist(basePt(slots[a], size), ball) + (/CB|FB/.test(slots[a].role) ? 999 : 0)) -
       (dist(basePt(slots[b], size), ball) + (/CB|FB/.test(slots[b].role) ? 999 : 0)));
     out[taker] = { i: taker, x: ball.x - sgn * 0.8 * sc, y: ball.y - 0.8 * sc, job: 'cornerTaker' };
-    const restN = { 7: 1, 9: 2, 11: 3 }[n];
+    const restN = { 5: 1, 7: 1, 9: 2, 11: 3 }[n];
     const rest = take(pool, restN, (a, b) => slots[a].y - slots[b].y);
     spreadX(size, rest.length, W * 0.22).forEach((x, j) => { out[rest[j]] = { i: rest[j], x, y: L * 0.5, job: 'restD' }; });
     const spots = [
@@ -229,7 +239,7 @@
     const sgn = ball.x < gx ? -1 : 1; // near-post side
     const G = { x: gx, y: 0 };
     const d = dist(ball, G);
-    const maxWall = { 7: 2, 9: 3, 11: 4 }[n];
+    const maxWall = { 5: 1, 7: 2, 9: 3, 11: 4 }[n];
     let nWall = d < pa[0] + 12 * sc ? maxWall : d < L * 0.3 ? Math.max(1, maxWall - 1) : d < L * 0.42 ? 1 : 0;
     if (Math.abs(ball.x - gx) > pa[1] / 2 + 2 && nWall > 1) nWall -= 1;
     const out = [];
@@ -251,7 +261,7 @@
       out[idx] = { i: idx, x: C.x + perp.x * o, y: C.y + perp.y * o, job: 'wall' };
     });
     const lineY = clamp(Math.min(ball.y - 2 * sc, pa[0] + 1), ga[0] + 1, L * 0.45);
-    const lineCap = { 7: 3, 9: 4, 11: 5 }[n];
+    const lineCap = { 5: 2, 7: 3, 9: 4, 11: 5 }[n];
     pool.sort((a, b) => slots[a].y - slots[b].y);
     const line = pool.splice(0, lineCap);
     spreadX(size, line.length, pa[1] * 0.36).sort((a, b) => a - b).forEach((x, j) => {
@@ -286,7 +296,7 @@
       const perp = { x: -back.y, y: back.x };
       out[dummy] = { i: dummy, x: ball.x + perp.x * 2 * sc + back.x * 1.2 * sc, y: ball.y + perp.y * 2 * sc + back.y * 1.2 * sc, job: 'fkDummy' };
     }
-    const restN = { 7: 1, 9: 2, 11: 3 }[n];
+    const restN = { 5: 1, 7: 1, 9: 2, 11: 3 }[n];
     const rest = take(pool, restN, (a, b) => slots[a].y - slots[b].y);
     const restY = clamp(ball.y - L * 0.35, L * 0.3, L * 0.55);
     spreadX(size, rest.length, W * 0.22).forEach((x, j) => { out[rest[j]] = { i: rest[j], x, y: restY, job: 'restD' }; });
