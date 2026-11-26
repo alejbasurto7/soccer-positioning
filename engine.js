@@ -354,18 +354,25 @@
     });
   }
 
-  function koFor(slots, size, ball) {
+  function koFor(slots, size, ball, opts) {
     const { W, L } = size, gx = W / 2, sc = W / 68;
     const out = shape(slots, size, ball, 'att');
     keepOwnHalf(out, size, false);
     const pool = fieldIdx(slots);
-    const kicker = take(pool, 1, (a, b) => (ROLE_ORDER_ATTACK[slots[a].role] - ROLE_ORDER_ATTACK[slots[b].role]) || (Math.abs(slots[a].x - .5) - Math.abs(slots[b].x - .5)))[0];
+    const skip = opts && opts.notTaker;  // slot index that chose not to take it
+    const KO_ORDER = { FW: 0, CM: 1, WM: 2, FB: 3, CB: 4 };
+    const rank = (i) => (i === skip ? 99 : KO_ORDER[slots[i].role]);
+    const kicker = take(pool, 1, (a, b) => (rank(a) - rank(b)) || (Math.abs(slots[a].x - .5) - Math.abs(slots[b].x - .5)))[0];
     out[kicker] = { i: kicker, x: gx, y: L / 2 - 0.6, job: 'kicker' };
     const recv = take(pool.filter(i => slots[i].role === 'CM'), 1, (a, b) => slots[b].y - slots[a].y)[0];
     if (recv !== undefined) out[recv] = { i: recv, x: gx - 3 * sc, y: L / 2 - 6 * sc, job: 'koReceiver' };
     pool.forEach(i => {
       const s = slots[i];
-      if (i !== recv && (s.role === 'FW' || (s.role === 'WM' && s.y > .5))) out[i] = { i, x: s.x * W, y: L / 2 - 0.8, job: 'koRun' };
+      if (i !== recv && (s.role === 'FW' || (s.role === 'WM' && s.y > .5))) {
+        // A central forward who passed on the kickoff steps beside the kicker.
+        const x = Math.abs(s.x - .5) < .1 ? gx + (s.x < .5 ? -1 : 1) * W * 0.17 : s.x * W;
+        out[i] = { i, x, y: L / 2 - 0.8, job: 'koRun' };
+      }
       else if (i !== recv) out[i].job = 'koShape';
     });
     return out;
@@ -402,7 +409,7 @@
     return out;
   }
 
-  // opts.notTaker: slot index that will not take the corner or free kick (someone else takes it)
+  // opts.notTaker: slot index that will not take the corner, free kick or kickoff (someone else takes it)
   function positions(sitId, slots, size, ball, phase, opts) {
     const out = sitId === 'open' ? openPlay(slots, size, ball, phase || 'att') : SIT_FN[sitId](slots, size, ball, opts);
     relax(out, size);

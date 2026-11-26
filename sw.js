@@ -1,5 +1,5 @@
 // Offline support: cache the app shell, serve cache first, refresh in the background.
-const CACHE = 'fys-v7';
+const CACHE = 'fys-v8';
 const FILES = ['./', 'index.html', 'styles.css', 'engine.js', 'tips.js', 'app.js', 'icon.svg', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => {

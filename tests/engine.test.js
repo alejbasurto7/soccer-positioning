@@ -29,7 +29,7 @@ for (const n of [5, 7, 9, 11]) {
   }
 }
 // Opting out of a corner or free kick: someone else takes it, and you get another spot.
-for (const [sit, job] of [['cornerFor', 'cornerTaker'], ['fkFor', 'fkTaker']])
+for (const [sit, job] of [['cornerFor', 'cornerTaker'], ['fkFor', 'fkTaker'], ['koFor', 'kicker']])
 for (const n of [5, 7, 9, 11]) for (const form of E.SIZES[n].forms) for (const side of ['L', 'R']) for (let k = 0; k < 10; k++) {
   const size = E.SIZES[n], slots = E.slotsFor(n, form);
   let ball = E.defaultBall(sit, size, side);

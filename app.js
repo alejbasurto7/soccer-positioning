@@ -160,7 +160,7 @@
 
   /* ---------- render ---------- */
   let ownPos = [], canSkip = false;
-  const TAKER_JOB = { cornerFor: 'cornerTaker', fkFor: 'fkTaker' };
+  const TAKER_JOB = { cornerFor: 'cornerTaker', fkFor: 'fkTaker', koFor: 'kicker' };
   function render() {
     const sz = size(), c = cur();
     if (!ball) ball = E.defaultBall(c.sit, sz, c.side);
@@ -225,7 +225,7 @@
       });
     } else {
       html += `<div class="coach-where">${esc(sitDef(c.sit).label)}</div>`;
-      if (canSkip && S.skipTake) html += `<p class="muted small">A teammate takes this ${c.sit === 'fkFor' ? 'free kick' : 'corner'}, so get to your spot.</p>`;
+      if (canSkip && S.skipTake) html += `<p class="muted small">A teammate takes this ${{ fkFor: 'free kick', koFor: 'kickoff' }[c.sit] || 'corner'}, so get to your spot.</p>`;
       if (job && job.tips) html += `<div class="job"><h3>Your job: ${esc(job.title)}</h3>${list(job.tips)}</div>`;
       else {
         const ph = /For$/.test(c.sit) ? 'att' : 'def';
