@@ -28,14 +28,17 @@ for (const n of [5, 7, 9, 11]) {
     }
   }
 }
-// Opting out of the corner: someone else takes it, and you get a box spot.
-for (const n of [5, 7, 9, 11]) for (const form of E.SIZES[n].forms) for (const side of ['L', 'R']) {
-  const size = E.SIZES[n], slots = E.slotsFor(n, form), ball = E.defaultBall('cornerFor', size, side);
-  const base = E.positions('cornerFor', slots, size, ball);
-  const me = base.findIndex(p => p.job === 'cornerTaker');
-  const out = E.positions('cornerFor', slots, size, ball, null, { notTaker: me });
-  ok(out[me].job !== 'cornerTaker', `${form} ${side} skip: still taker`);
-  ok(out.filter(p => p.job === 'cornerTaker').length === 1, `${form} ${side} skip: one taker`);
+// Opting out of a corner or free kick: someone else takes it, and you get another spot.
+for (const [sit, job] of [['cornerFor', 'cornerTaker'], ['fkFor', 'fkTaker']])
+for (const n of [5, 7, 9, 11]) for (const form of E.SIZES[n].forms) for (const side of ['L', 'R']) for (let k = 0; k < 10; k++) {
+  const size = E.SIZES[n], slots = E.slotsFor(n, form);
+  let ball = E.defaultBall(sit, size, side);
+  if (sit === 'fkFor' && k) ball = E.clampBall(sit, size, { x: Math.random() * size.W, y: Math.random() * size.L });
+  const base = E.positions(sit, slots, size, ball);
+  const me = base.findIndex(p => p.job === job);
+  const out = E.positions(sit, slots, size, ball, null, { notTaker: me });
+  ok(out[me].job !== job, `${sit} ${form} ${side} skip: still taker`);
+  ok(out.filter(p => p.job === job).length === 1, `${sit} ${form} ${side} skip: one taker`);
 }
 console.log(fails ? `${fails} failures` : 'all engine checks passed');
 process.exit(fails ? 1 : 0);

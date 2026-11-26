@@ -279,15 +279,16 @@
     return out;
   }
 
-  function fkFor(slots, size, ball) {
+  function fkFor(slots, size, ball, opts) {
     const { W, L, ga, pa, n } = size, gx = W / 2, sc = W / 68;
     const G = { x: gx, y: L };
     const out = [];
     out[0] = { i: 0, x: gx, y: clamp(ball.y * 0.35, 2, L * 0.3), job: 'gkUp' };
     const pool = fieldIdx(slots);
     const pref = (s) => (s.role === 'CM' || s.role === 'WM' ? 0 : 40);
-    const taker = take(pool, 1, (a, b) =>
-      (dist(basePt(slots[a], size), ball) + pref(slots[a])) - (dist(basePt(slots[b], size), ball) + pref(slots[b])))[0];
+    const skip = opts && opts.notTaker;  // slot index that chose not to take it
+    const cost = (i) => dist(basePt(slots[i], size), ball) + pref(slots[i]) + (i === skip ? 9999 : 0);
+    const taker = take(pool, 1, (a, b) => cost(a) - cost(b))[0];
     const back = unit(G, ball);
     out[taker] = { i: taker, x: ball.x + back.x * 1.2 * sc, y: ball.y + back.y * 1.2 * sc, job: 'fkTaker' };
     const close = dist(ball, G) < L * 0.35;
@@ -401,7 +402,7 @@
     return out;
   }
 
-  // opts.notTaker: slot index that will not take the corner (someone else takes it)
+  // opts.notTaker: slot index that will not take the corner or free kick (someone else takes it)
   function positions(sitId, slots, size, ball, phase, opts) {
     const out = sitId === 'open' ? openPlay(slots, size, ball, phase || 'att') : SIT_FN[sitId](slots, size, ball, opts);
     relax(out, size);
