@@ -129,18 +129,21 @@
     return d + 'Z';
   }
 
+  // Shift the baseline down by half a cap height so caps/digits sit on the dot's centre.
+  // Works in every browser, unlike dominant-baseline, which Safari renders inconsistently.
+  const CENTER_DY = '0.35em';
   let ownToks = [], oppToks = [];
   function token(parent, label, kit, r, cls) {
     const g = el('g', { class: 'tok ' + cls }, parent);
     if (cls.includes('you')) el('circle', { class: 'pulse', r: r, fill: 'none', stroke: '#fff', 'stroke-width': r * .18 }, g);
     el('circle', { r: r * 1.08, fill: 'rgba(0,0,0,.28)', cy: r * .22 }, g);
     el('circle', { r, fill: kit.c, stroke: cls.includes('you') ? '#fff' : 'rgba(0,0,0,.45)', 'stroke-width': r * (cls.includes('you') ? .2 : .1) }, g);
-    const t = el('text', { 'font-size': r * (String(label).length > 2 ? .78 : .95), fill: kit.t }, g);
+    const t = el('text', { 'font-size': r * (String(label).length > 2 ? .78 : .95), fill: kit.t, dy: CENTER_DY }, g);
     t.textContent = label;
     if (cls.includes('you')) {
       const tag = el('g', { transform: `translate(0 ${-r * 1.95})` }, g);
       el('rect', { x: -r * 1.05, y: -r * .5, width: r * 2.1, height: r, rx: r * .45, fill: '#FF7A3D' }, tag);
-      el('text', { 'font-size': r * .62, fill: '#2A1407' }, tag).textContent = 'YOU';
+      el('text', { 'font-size': r * .62, fill: '#2A1407', dy: CENTER_DY }, tag).textContent = 'YOU';
     }
     return g;
   }
@@ -360,7 +363,7 @@
       const g = el('g', { class: 'dot', 'data-slot': i, transform: `translate(${s.x * sz.W} ${sz.L - (s.y * 1.15 + .05) * sz.L})`, role: 'button', tabindex: 0, 'aria-label': s.name }, mini);
       const kit = s.role === 'GK' ? GK_KIT : k;
       el('circle', { r, fill: kit.c, stroke: i === S.slot ? '#FF7A3D' : 'rgba(0,0,0,.4)', 'stroke-width': i === S.slot ? r * .3 : r * .1 }, g);
-      el('text', { 'font-size': r * .7, fill: kit.t, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-weight': 800 }, g).textContent = s.abbr;
+      el('text', { 'font-size': r * .7, fill: kit.t, 'text-anchor': 'middle', dy: CENTER_DY, 'font-weight': 800 }, g).textContent = s.abbr;
     });
     $('posName').textContent = slots()[S.slot].name;
   }

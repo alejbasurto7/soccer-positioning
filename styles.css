@@ -62,7 +62,7 @@ h2 { margin: 0; font-size: 20px; }
 /* SVG */
 .tok { transition: transform .55s cubic-bezier(.2,.8,.2,1); }
 #field.dragging .tok { transition-duration: .28s; }
-.tok text { font-weight: 800; text-anchor: middle; dominant-baseline: central; pointer-events: none; font-family: var(--font); }
+.tok text { font-weight: 800; text-anchor: middle; pointer-events: none; font-family: var(--font); }
 .tok.opp { opacity: .85; }
 .tok.you .pulse { animation: pulse 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes pulse { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(1.9); opacity: 0; } }
