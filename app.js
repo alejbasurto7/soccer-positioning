@@ -160,7 +160,7 @@
 
   /* ---------- render ---------- */
   let ownPos = [], canSkip = false;
-  const TAKER_JOB = { cornerFor: 'cornerTaker', fkFor: 'fkTaker', koFor: 'kicker' };
+  const TAKER_JOB = { cornerFor: 'cornerTaker', fkFor: 'fkTaker', koFor: 'kicker', tiFor: 'tiTaker' };
   function render() {
     const sz = size(), c = cur();
     if (!ball) ball = E.defaultBall(c.sit, sz, c.side);
@@ -228,7 +228,7 @@
       });
     } else {
       html += `<div class="coach-where">${esc(sitDef(c.sit).label)}</div>`;
-      if (canSkip && S.skipTake) html += `<p class="muted small">A teammate takes this ${{ fkFor: 'free kick', koFor: 'kickoff' }[c.sit] || 'corner'}, so get to your spot.</p>`;
+      if (canSkip && S.skipTake) html += `<p class="muted small">A teammate takes this ${{ fkFor: 'free kick', koFor: 'kickoff', tiFor: 'throw-in' }[c.sit] || 'corner'}, so get to your spot.</p>`;
       if (job && job.tips) html += `<div class="job"><h3>Your job: ${esc(job.title)}</h3>${list(job.tips)}</div>`;
       else {
         const ph = /For$/.test(c.sit) ? 'att' : 'def';
@@ -252,7 +252,7 @@
   }
   svg.addEventListener('pointerdown', (e) => {
     if (quiz) { if (!quiz.guess) quizGuess(toField(e)); return; }
-    if (!sitDef(S.sit).drag) { toast('Pick Open play or a free kick to move the ball.'); return; }
+    if (!sitDef(S.sit).drag) { toast('Pick Open play, a free kick or a throw-in to move the ball.'); return; }
     dragging = true; svg.classList.add('dragging');
     svg.setPointerCapture(e.pointerId);
     moveBall(toField(e));
@@ -269,10 +269,11 @@
   });
 
   /* ---------- controls ---------- */
-  // Situations are shown as 5 groups so they all fit on one row; set pieces get a "For us / Against us" switch.
+  // Situations are shown as 6 groups so they fit without swiping; set pieces get a "For us / Against us" switch.
   const SIT_GROUPS = [
     { id: 'open', label: 'Open play' }, { id: 'corner', label: 'Corner', paired: true }, { id: 'fk', label: 'Free kick', paired: true },
     { id: 'gk', label: 'Goal kick', paired: true }, { id: 'ko', label: 'Kickoff', paired: true },
+    { id: 'ti', label: 'Throw-in', paired: true },
   ];
   const sitGroup = (sit) => SIT_GROUPS.find(g => sit === g.id || sit.startsWith(g.id) && /^(For|Against)$/.test(sit.slice(g.id.length))) || SIT_GROUPS[0];
   const sitTeam = (sit) => /Against$/.test(sit) ? 'Against' : 'For';
@@ -306,7 +307,7 @@
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.remove('hide'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hide'), 2200); }
 
   /* ---------- quiz ---------- */
-  const QUIZ_SITS = ['open', 'open', 'open', 'open', 'open', 'cornerFor', 'cornerAgainst', 'fkAgainst', 'gkFor', 'gkAgainst', 'koFor', 'koAgainst'];
+  const QUIZ_SITS = ['open', 'open', 'open', 'open', 'open', 'cornerFor', 'cornerAgainst', 'fkAgainst', 'gkFor', 'gkAgainst', 'koFor', 'koAgainst', 'tiFor', 'tiAgainst', 'tiFor', 'tiAgainst'];
   function quizNew() {
     const sz = size();
     const sit = QUIZ_SITS[Math.floor(Math.random() * QUIZ_SITS.length)];
@@ -314,6 +315,7 @@
     const phase = ['att', 'def', 'loose'][Math.floor(Math.random() * 3)];
     let b = E.defaultBall(sit, sz, side);
     if (sit === 'open') b = { x: sz.W * (.08 + Math.random() * .84), y: sz.L * (.08 + Math.random() * .84) };
+    if (/^ti/.test(sit)) b = E.clampBall(sit, sz, { x: side === 'L' ? 0 : sz.W, y: sz.L * (.08 + Math.random() * .84) });
     if (sit === 'fkAgainst') b = E.clampBall(sit, sz, { x: sz.W * (.15 + Math.random() * .7), y: sz.pa[0] + Math.random() * sz.L * .3 });
     quiz = { sit, side, phase, ball: b, guess: null };
     layer.quiz.innerHTML = '';

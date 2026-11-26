@@ -28,12 +28,21 @@ for (const n of [5, 7, 9, 11]) {
     }
   }
 }
+// Throw-ins: one thrower on the line, nobody else within 2 m of the ball when defending.
+for (const n of [5, 7, 9, 11]) for (const form of E.SIZES[n].forms) for (let k = 0; k < 20; k++) {
+  const size = E.SIZES[n], slots = E.slotsFor(n, form);
+  const ball = E.clampBall('tiFor', size, { x: Math.random() * size.W, y: Math.random() * size.L });
+  const f = E.positions('tiFor', slots, size, ball);
+  ok(f.filter(p => p.job === 'tiTaker').length === 1, `tiFor ${form} one thrower`);
+  ok(slots[f.findIndex(p => p.job === 'tiTaker')].role !== 'GK', `tiFor ${form} keeper throws`);
+  E.positions('tiAgainst', slots, size, ball).forEach(p => ok(p.job === 'gk' || E.dist(p, ball) >= 2, `tiAgainst ${form} too close`));
+}
 // Opting out of a corner or free kick: someone else takes it, and you get another spot.
-for (const [sit, job] of [['cornerFor', 'cornerTaker'], ['fkFor', 'fkTaker'], ['koFor', 'kicker']])
+for (const [sit, job] of [['cornerFor', 'cornerTaker'], ['fkFor', 'fkTaker'], ['koFor', 'kicker'], ['tiFor', 'tiTaker']])
 for (const n of [5, 7, 9, 11]) for (const form of E.SIZES[n].forms) for (const side of ['L', 'R']) for (let k = 0; k < 10; k++) {
   const size = E.SIZES[n], slots = E.slotsFor(n, form);
   let ball = E.defaultBall(sit, size, side);
-  if (sit === 'fkFor' && k) ball = E.clampBall(sit, size, { x: Math.random() * size.W, y: Math.random() * size.L });
+  if ((sit === 'fkFor' || sit === 'tiFor') && k) ball = E.clampBall(sit, size, { x: Math.random() * size.W, y: Math.random() * size.L });
   const base = E.positions(sit, slots, size, ball);
   const me = base.findIndex(p => p.job === job);
   const out = E.positions(sit, slots, size, ball, null, { notTaker: me });

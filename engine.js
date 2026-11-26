@@ -89,10 +89,13 @@
     { id: 'gkAgainst',     label: 'Their goal kick' },
     { id: 'koFor',         label: 'Our kickoff' },
     { id: 'koAgainst',     label: 'Their kickoff' },
+    { id: 'tiFor',         label: 'Our throw-in',      drag: true },
+    { id: 'tiAgainst',     label: 'Their throw-in',    drag: true },
   ];
   const MIRROR = {
     open: 'open', cornerFor: 'cornerAgainst', cornerAgainst: 'cornerFor', fkFor: 'fkAgainst', fkAgainst: 'fkFor',
     gkFor: 'gkAgainst', gkAgainst: 'gkFor', koFor: 'koAgainst', koAgainst: 'koFor',
+    tiFor: 'tiAgainst', tiAgainst: 'tiFor',
   };
   const FLIP_PHASE = { att: 'def', def: 'att', loose: 'loose' };
 
@@ -385,12 +388,75 @@
     return out;
   }
 
+  /* ---------- throw-ins ---------- */
+  // Ball sits on a touchline. sgn: +1 into the field from that line.
+  function tiFor(slots, size, ball, opts) {
+    const { W, L } = size, sc = W / 68;
+    const left = ball.x < W / 2, sgn = left ? 1 : -1, lineX = left ? 0 : W;
+    const out = shape(slots, size, ball, 'att');
+    const pool = fieldIdx(slots);
+    const skip = opts && opts.notTaker;  // slot index that chose not to take it
+    const sideOk = (s) => (left ? s.x < .5 : s.x > .5);
+    // Outside backs take it in our half, wide players up the field.
+    const pref = (s) => (!sideOk(s) ? 60 : ball.y < L * 0.5 ? (s.role === 'FB' ? 0 : s.role === 'WM' ? 8 : 25) : (s.role === 'WM' ? 0 : s.role === 'FB' ? 8 : 25));
+    const cost = (i) => dist(basePt(slots[i], size), ball) * 0.5 + pref(slots[i]) + (i === skip ? 9999 : 0);
+    const taker = take(pool, 1, (a, b) => cost(a) - cost(b))[0];
+    out[taker] = { i: taker, x: lineX + sgn * 0.4, y: ball.y, job: 'tiTaker' };
+    const near = (i) => dist(out[i], ball);
+    const opts3 = [
+      ['tiLine', lineX + sgn * 2.5 * sc, clamp(ball.y + 9 * sc, 2, L - 1.5)],
+      ['tiShort', lineX + sgn * 8 * sc, clamp(ball.y + 1.5 * sc, 2, L - 2)],
+      ['tiBack', lineX + sgn * 5 * sc, clamp(ball.y - 8 * sc, 1.5, L - 2)],
+    ];
+    opts3.forEach(([job, x, y]) => {
+      if (!pool.length) return;
+      const tgt = { x, y };
+      const idx = take(pool, 1, (a, b) => (dist(out[a], tgt) + near(a) * 0.3) - (dist(out[b], tgt) + near(b) * 0.3))[0];
+      out[idx] = { i: idx, x, y, job };
+    });
+    // Near their goal, a big player attacks the box for a long throw.
+    if (ball.y > L * 0.75 && pool.length) {
+      const fw = take(pool, 1, (a, b) => (slots[a].role === 'FW' ? 0 : 1) - (slots[b].role === 'FW' ? 0 : 1) || slots[b].y - slots[a].y)[0];
+      out[fw] = { i: fw, x: W / 2 - sgn * W * 0.05, y: L - size.spot, job: 'tiBox' };
+    }
+    pool.forEach(i => { if (slots[i].role !== 'GK') out[i].job = 'tiShape'; });
+    return out;
+  }
+
+  function tiAgainst(slots, size, ball) {
+    const { W, L } = size, sc = W / 68;
+    const left = ball.x < W / 2, sgn = left ? 1 : -1, lineX = left ? 0 : W;
+    const out = shape(slots, size, ball, 'def');
+    const pool = fieldIdx(slots);
+    // Mark where they want to throw it: down the line and short inside. Stay goal side.
+    const marks = [
+      ['tiMarkLine', lineX + sgn * 3 * sc, clamp(ball.y + 7 * sc, 2, L - 2)],
+      ['tiMarkShort', lineX + sgn * 8 * sc, clamp(ball.y - 1.5 * sc, 1.5, L - 2)],
+      ['tiMarkBack', lineX + sgn * 6.5 * sc, clamp(ball.y - 9 * sc, 1.5, L - 2)],
+    ];
+    marks.forEach(([job, x, y]) => {
+      const tgt = { x, y };
+      const idx = take(pool, 1, (a, b) => dist(out[a], tgt) - dist(out[b], tgt))[0];
+      out[idx] = { i: idx, x, y, job };
+    });
+    pool.forEach(i => { out[i].job = 'tiShape'; });
+    return out;
+  }
+
+  // Defenders stay 2 m (about 2 yards) away from the thrower.
+  function throwSpace(out, ball) {
+    out.forEach(p => {
+      if (p.job === 'gk' || p.job === 'tiTaker') return;
+      if (dist(p, ball) < 2.5) { const u = unit(ball, p); p.x = ball.x + u.x * 2.5; p.y = ball.y + u.y * 2.5; }
+    });
+  }
+
   /* ---------- public ---------- */
-  const SIT_FN = { cornerFor, cornerAgainst, fkFor, fkAgainst, gkFor, gkAgainst, koFor, koAgainst };
+  const SIT_FN = { cornerFor, cornerAgainst, fkFor, fkAgainst, gkFor, gkAgainst, koFor, koAgainst, tiFor, tiAgainst };
 
   function relax(out, size) {
     const minD = tokenR(size) * 2.15;
-    const pinned = new Set(['onBall', 'press', 'win', 'wall', 'gkKick', 'cornerTaker', 'fkTaker', 'kicker']);
+    const pinned = new Set(['onBall', 'press', 'win', 'wall', 'gkKick', 'cornerTaker', 'fkTaker', 'kicker', 'tiTaker']);
     for (let it = 0; it < 24; it++) {
       for (let a = 0; a < out.length; a++) for (let b = a + 1; b < out.length; b++) {
         const p = out[a], q = out[b];
@@ -409,11 +475,12 @@
     return out;
   }
 
-  // opts.notTaker: slot index that will not take the corner, free kick or kickoff (someone else takes it)
+  // opts.notTaker: slot index that will not take the corner, free kick, kickoff or throw-in (someone else takes it)
   function positions(sitId, slots, size, ball, phase, opts) {
     const out = sitId === 'open' ? openPlay(slots, size, ball, phase || 'att') : SIT_FN[sitId](slots, size, ball, opts);
     relax(out, size);
     if (sitId === 'koFor' || sitId === 'koAgainst') keepOwnHalf(out, size, sitId === 'koAgainst');
+    if (sitId === 'tiAgainst') throwSpace(out, ball);
     return out;
   }
 
@@ -434,6 +501,8 @@
       case 'fkAgainst': return { x: gx - 7 * sc, y: pa[0] + 8 * sc };
       case 'gkFor': return { x: gx - ga[1] / 4, y: ga[0] };
       case 'gkAgainst': return { x: gx + ga[1] / 4, y: L - ga[0] };
+      case 'tiFor': return { x: left ? 0.3 : W - 0.3, y: L * 0.6 };
+      case 'tiAgainst': return { x: left ? 0.3 : W - 0.3, y: L * 0.4 };
       default: return { x: gx, y: L / 2 };
     }
   }
@@ -443,6 +512,7 @@
     let x = clamp(b.x, 0.3, W - 0.3), y = clamp(b.y, 0.3, L - 0.3);
     if (sitId === 'fkFor') y = Math.max(y, L / 2);
     if (sitId === 'fkAgainst') y = Math.min(y, L / 2);
+    if (sitId === 'tiFor' || sitId === 'tiAgainst') { x = x < W / 2 ? 0.3 : W - 0.3; y = clamp(y, 2, L - 2); }
     return { x, y };
   }
 
