@@ -100,7 +100,9 @@
     });
     if (!opts.mini) {
       el('text', { x: gx, y: L + m * .78, 'text-anchor': 'middle', 'font-size': W * .03, fill: 'rgba(255,255,255,.75)', 'font-weight': 700 }, g).textContent = 'OUR GOAL';
-      el('text', { x: gx, y: -m * .3, 'text-anchor': 'middle', 'font-size': W * .03, fill: 'rgba(255,255,255,.75)', 'font-weight': 700 }, g).textContent = 'WE ATTACK THIS WAY ↑';
+      // Sit the label above the attacking goal's net, with clear space between them.
+      const netTop = -1.6 * Math.max(sc, .6), fs = W * .03;
+      el('text', { x: gx, y: netTop - fs * .5, 'text-anchor': 'middle', 'font-size': fs, fill: 'rgba(255,255,255,.75)', 'font-weight': 700 }, g).textContent = 'WE ATTACK THIS WAY ↑';
     }
     return g;
   }
