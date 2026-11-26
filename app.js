@@ -183,8 +183,11 @@
 
   function renderControls() {
     const c = cur(), def = sitDef(c.sit);
-    [...$('sitChips').children].forEach(btn => btn.setAttribute('aria-selected', String(btn.dataset.sit === c.sit)));
+    const g = sitGroup(c.sit);
+    [...$('sitChips').children].forEach(btn => btn.setAttribute('aria-selected', String(btn.dataset.group === g.id)));
     $('phaseSeg').classList.toggle('hide', c.sit !== 'open');
+    $('teamSeg').classList.toggle('hide', !g.paired);
+    [...$('teamSeg').children].forEach(b => b.setAttribute('aria-checked', String(c.sit === g.id + b.dataset.team)));
     $('sideSeg').classList.toggle('hide', !def.sides);
     [...$('phaseSeg').children].forEach(b => b.setAttribute('aria-checked', String(b.dataset.phase === c.phase)));
     [...$('sideSeg').children].forEach(b => b.setAttribute('aria-checked', String(b.dataset.side === c.side)));
@@ -266,12 +269,27 @@
   });
 
   /* ---------- controls ---------- */
+  // Situations are shown as 5 groups so they all fit on one row; set pieces get a "For us / Against us" switch.
+  const SIT_GROUPS = [
+    { id: 'open', label: 'Open play' }, { id: 'corner', label: 'Corner', paired: true }, { id: 'fk', label: 'Free kick', paired: true },
+    { id: 'gk', label: 'Goal kick', paired: true }, { id: 'ko', label: 'Kickoff', paired: true },
+  ];
+  const sitGroup = (sit) => SIT_GROUPS.find(g => sit === g.id || sit.startsWith(g.id) && /^(For|Against)$/.test(sit.slice(g.id.length))) || SIT_GROUPS[0];
+  const sitTeam = (sit) => /Against$/.test(sit) ? 'Against' : 'For';
+  function setSit(sit) { S.sit = sit; ball = E.defaultBall(S.sit, size(), S.side); save(); render(); }
   function buildChips() {
-    $('sitChips').innerHTML = E.SITUATIONS.map(s => `<button type="button" role="tab" data-sit="${s.id}">${esc(s.label)}</button>`).join('');
+    $('sitChips').innerHTML = SIT_GROUPS.map(g => `<button type="button" role="tab" data-group="${g.id}">${esc(g.label)}</button>`).join('');
   }
   $('sitChips').addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
-    S.sit = b.dataset.sit; ball = E.defaultBall(S.sit, size(), S.side); save(); render();
+    const g = SIT_GROUPS.find(x => x.id === b.dataset.group);
+    const sit = g.paired ? g.id + sitTeam(S.sit) : g.id;
+    if (sit !== S.sit) setSit(sit);
+  });
+  $('teamSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b || quiz) return;
+    const sit = sitGroup(S.sit).id + b.dataset.team;
+    if (sit !== S.sit) setSit(sit);
   });
   $('phaseSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b || quiz) return; S.phase = b.dataset.phase; save(); render(); });
   $('sideSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b || quiz) return; S.side = b.dataset.side; ball = E.defaultBall(S.sit, size(), S.side); save(); render(); });
