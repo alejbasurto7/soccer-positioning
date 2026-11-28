@@ -109,10 +109,6 @@ dialog::backdrop { background: rgba(0,0,0,.45); }
 .setup { height: 100%; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 12px; }
 .setup-head { display: flex; justify-content: space-between; align-items: center; }
 .setup-main { display: flex; flex-direction: column; gap: 10px; }
-.row { display: flex; gap: 8px; }
-.setup input { border: 1.5px solid var(--rule); border-radius: 10px; padding: 7px 10px; background: var(--bg); font-weight: 500; min-width: 0; }
-.setup input.grow { flex: 1; }
-.setup input.num { width: 64px; text-align: center; }
 .field { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 14px; }
 .field.inline { flex-direction: row; align-items: center; gap: 10px; }
 .field.inline > span { width: 74px; flex: none; }

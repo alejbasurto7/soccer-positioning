@@ -20,9 +20,10 @@
 
   /* ---------- state ---------- */
   const KEY = 'fys.v1';
-  const DEFAULTS = { size: 9, form: '3-2-3', slot: 4, kit: 'red', num: 10, name: '', sit: 'open', side: 'L', phase: 'att', showOpp: true, skipTake: false, best: 0, onboarded: false };
+  const DEFAULTS = { size: 9, form: '3-2-3', slot: 4, kit: 'red', sit: 'open', side: 'L', phase: 'att', showOpp: true, skipTake: false, best: 0, onboarded: false };
   let S = Object.assign({}, DEFAULTS);
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* storage blocked */ }
+  delete S.num; delete S.name;
   if ('skipCorner' in S) { S.skipTake = !!S.skipCorner; delete S.skipCorner; }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } };
 
@@ -154,7 +155,7 @@
     ownToks = slots().map((s, i) => {
       const isYou = i === S.slot;
       const kit = s.role === 'GK' ? GK_KIT : k;
-      return token(layer.own, isYou ? S.num : s.abbr, kit, isYou ? r * 1.18 : r, isYou ? 'you' : 'mate');
+      return token(layer.own, s.abbr, kit, isYou ? r * 1.18 : r, isYou ? 'you' : 'mate');
     });
     // draw "you" on top
     layer.own.appendChild(ownToks[S.slot]);
@@ -202,7 +203,7 @@
     $('takeToggleWrap').classList.toggle('hide', !canSkip);
     $('takeToggle').checked = !!S.skipTake;
     const k = kitOf(S.kit), s = slots()[S.slot];
-    $('meChip').innerHTML = `<i style="background:${s.role === 'GK' ? GK_KIT.c : k.c}"></i>${esc(s.abbr)} #${esc(S.num)}`;
+    $('meChip').innerHTML = `<i style="background:${s.role === 'GK' ? GK_KIT.c : k.c}"></i>${esc(s.abbr)}`;
   }
 
   function myJob() { return ownPos[S.slot] ? ownPos[S.slot].job : 'shape'; }
@@ -220,8 +221,7 @@
   function renderCoach() {
     const s = slots()[S.slot], c = cur(), sz = size(), b = quiz ? quiz.ball : ball;
     const job = T.JOBS[myJob()];
-    const who = `${S.name ? esc(S.name) + ', ' : ''}${esc(s.name)} #${esc(S.num)}`;
-    let html = `<div class="coach-who">${who}</div>`;
+    let html = `<div class="coach-who">${esc(s.name)}</div>`;
     if (quiz && !quiz.guess) { $('coach').innerHTML = html + '<p class="muted">Make your guess first. Tips appear after you tap the field.</p>'; return; }
     if (c.sit === 'open') {
       const third = E.thirdOf(sz, b);
@@ -353,8 +353,6 @@
   /* ---------- setup dialog ---------- */
   const dlg = $('setup');
   function renderSetup() {
-    $('nameIn').value = S.name;
-    $('numIn').value = S.num;
     $('sizeSeg').innerHTML = [5, 7, 9, 11].map(n => `<button type="button" role="radio" data-size="${n}" aria-checked="${n === S.size}">${E.SIZES[n].label}</button>`).join('');
     $('formSeg').innerHTML = E.SIZES[S.size].forms.map(f => `<button type="button" role="radio" data-form="${f}" aria-checked="${f === S.form}">${f}</button>`).join('');
     $('kitRow').innerHTML = KITS.map(k => `<button type="button" role="radio" aria-label="${k.name}" data-kit="${k.id}" aria-checked="${k.id === S.kit}" style="background:${k.c}"></button>`).join('');
@@ -388,8 +386,6 @@
   const pickSlot = (e) => { const g = e.target.closest('.dot'); if (!g) return; S.slot = +g.dataset.slot; setupChanged(); };
   $('miniField').addEventListener('click', pickSlot);
   $('miniField').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickSlot(e); } });
-  $('nameIn').addEventListener('input', (e) => { S.name = e.target.value.trim().slice(0, 20); save(); renderCoach(); });
-  $('numIn').addEventListener('change', (e) => { const n = Math.max(0, Math.min(99, parseInt(e.target.value, 10) || 0)); S.num = n; setupChanged(); });
   $('shareBtn').addEventListener('click', async () => {
     const url = `${location.origin}${location.pathname}?size=${S.size}&f=${encodeURIComponent(S.form)}`;
     try {

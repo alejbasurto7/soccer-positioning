@@ -14,7 +14,7 @@ It is an original app. It has its own positioning engine and its own coaching ti
 - **Build-out lines** drawn for 7v7 and 9v9.
 - **Coach tips**: for each position, three tips for each phase (we have it, they have it, loose ball) in each third of the field. Set pieces show the player's job (for example "Be in the wall", "Near post run").
 - **Quiz mode**: the app hides your player. You tap where you think you should be and get scored in yards. It keeps a streak.
-- **Your kit**: six kit colors and your own shirt number.
+- **Your kit**: six kit colors.
 - **Team link**: coaches set size and formation, tap "Copy team link", and send it. Players open it and only pick their position.
 - **Works offline** and installs to the home screen (PWA). No accounts, no tracking. Settings stay on the device.
 
