@@ -158,8 +158,12 @@
     const coverD = Math.min(L * 0.08, dist(ball, goal) * 0.5);
     if (phase === 'att') {
       out[n1] = { i: n1, x: ball.x, y: ball.y - 0.8 * sc, job: 'onBall' };
-      const towardMiddle = ball.x < W / 2 ? 1 : -1;
-      out[n2] = { i: n2, x: clamp(ball.x + towardMiddle * W * 0.13, 2, W - 2), y: clamp(ball.y - L * 0.06, 2, L - 2), job: 'support' };
+      // Support from the helper's own side of the ball (a right mid helps on the right).
+      // Only switch sides when the touchline leaves no room.
+      const off = W * 0.13;
+      let dir = out[n2].x >= ball.x ? 1 : -1;
+      if (ball.x + dir * off > W - 2 || ball.x + dir * off < 2) dir = -dir;
+      out[n2] = { i: n2, x: clamp(ball.x + dir * off, 2, W - 2), y: clamp(ball.y - L * 0.06, 2, L - 2), job: 'support' };
     } else {
       out[n1] = phase === 'def'
         ? { i: n1, x: ball.x + toGoal.x * 1.5 * sc, y: ball.y + toGoal.y * 1.5 * sc, job: 'press' }

@@ -49,5 +49,15 @@ for (const n of [5, 7, 9, 11]) for (const form of E.SIZES[n].forms) for (const s
   ok(out[me].job !== job, `${sit} ${form} ${side} skip: still taker`);
   ok(out.filter(p => p.job === job).length === 1, `${sit} ${form} ${side} skip: one taker`);
 }
+// Support player helps from their own side: the screenshot case (7v7 2-3-1, ball just right of center, high up).
+{
+  const size = E.SIZES[7], slots = E.slotsFor(7, '2-3-1');
+  for (const bx of [0.52, 0.6, 0.7]) {
+    const ball = { x: size.W * bx, y: size.L * 0.8 };
+    const out = E.positions('open', slots, size, ball, 'att');
+    const s = out.findIndex(p => p.job === 'support');
+    if (slots[s].x > .5) ok(out[s].x > ball.x, `support on own side ${slots[s].abbr} ${bx}`);
+  }
+}
 console.log(fails ? `${fails} failures` : 'all engine checks passed');
 process.exit(fails ? 1 : 0);

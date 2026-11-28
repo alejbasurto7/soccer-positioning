@@ -1,5 +1,5 @@
 // Offline support: cache the app shell, serve cache first, refresh in the background.
-const CACHE = 'fys-v13';
+const CACHE = 'fys-v14';
 const FILES = ['./', 'index.html', 'styles.css', 'engine.js', 'tips.js', 'app.js', 'icon.svg', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); });
 // A new version waits until the user taps Update (or all tabs close).
